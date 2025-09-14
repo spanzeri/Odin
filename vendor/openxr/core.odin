@@ -555,4 +555,10 @@ EXT_spatial_persistence_operations_SPEC_VERSION         :: 1
 EXT_SPATIAL_PERSISTENCE_OPERATIONS_EXTENSION_NAME       :: "XR_EXT_spatial_persistence_operations"
 EXT_loader_init_properties_SPEC_VERSION                 :: 1
 EXT_LOADER_INIT_PROPERTIES_EXTENSION_NAME               :: "XR_EXT_loader_init_properties"
+KHR_android_thread_settings_SPEC_VERSION                :: 6
+KHR_ANDROID_THREAD_SETTINGS_EXTENSION_NAME              :: "XR_KHR_android_thread_settings"
+KHR_android_surface_swapchain_SPEC_VERSION              :: 4
+KHR_ANDROID_SURFACE_SWAPCHAIN_EXTENSION_NAME            :: "XR_KHR_android_surface_swapchain"
+KHR_android_create_instance_SPEC_VERSION                :: 3
+KHR_ANDROID_CREATE_INSTANCE_EXTENSION_NAME              :: "XR_KHR_android_create_instance"
 SetProcAddressType :: #type proc(p: rawptr, name: cstring)

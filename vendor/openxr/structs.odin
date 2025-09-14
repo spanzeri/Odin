@@ -3,6 +3,29 @@
 //
 package vendor_openxr
 
+
+import "vendor:egl"
+_ :: egl
+
+when ODIN_OS == .Linux {
+    EGLDisplay :: egl.Display
+    EGLConfig  :: egl.Config
+    EGLContext :: egl.Context
+} else {
+    EGLDisplay :: rawptr
+    EGLConfig  :: rawptr
+    EGLContext :: rawptr
+}
+
+when ODIN_PLATFORM_SUBTARGET == .Android {
+    // @TODO: If an android library is added to the vendor or core packages,
+    // this should be imported from there instead.
+    AIBinder :: struct {}
+} else {
+    AIBinder :: struct {}
+}
+
+jobject :: rawptr // Android JNI object handle
 ApiLayerProperties :: struct {
     type:         StructureType,
     next:         rawptr,
@@ -4253,5 +4276,12 @@ LoaderInitInfoPropertiesEXT :: struct {
     next:               rawptr,
     propertyValueCount: u32,
     propertyValues:     [^]LoaderInitPropertyValueEXT,
+}
+
+InstanceCreateInfoAndroidKHR :: struct {
+    type:                StructureType,
+    next:                rawptr,
+    applicationVM:       rawptr,
+    applicationActivity: rawptr,
 }
 

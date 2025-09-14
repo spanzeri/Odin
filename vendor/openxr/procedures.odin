@@ -201,6 +201,8 @@ ProcCreateSpatialContextAsyncEXT ::                      #type proc "system" (se
 ProcCreateSpatialContextCompleteEXT ::                   #type proc "system" (session: Session, future: FutureEXT, completion: ^CreateSpatialContextCompletionEXT) -> Result
 ProcCreateSpatialPersistenceContextAsyncEXT ::           #type proc "system" (session: Session, createInfo: ^SpatialPersistenceContextCreateInfoEXT, future: ^FutureEXT) -> Result
 ProcCreateSpatialPersistenceContextCompleteEXT ::        #type proc "system" (session: Session, future: FutureEXT, completion: ^CreateSpatialPersistenceContextCompletionEXT) -> Result
+ProcSetAndroidApplicationThreadKHR ::                    #type proc "system" (session: Session, threadType: AndroidThreadTypeKHR, threadId: u32) -> Result
+ProcCreateSwapchainAndroidSurfaceKHR ::                  #type proc "system" (session: Session, info: ^SwapchainCreateInfo, swapchain: ^Swapchain, surface: ^jobject) -> Result
 
 // Other procedures
 
@@ -609,6 +611,8 @@ CreateSpatialContextAsyncEXT:                      ProcCreateSpatialContextAsync
 CreateSpatialContextCompleteEXT:                   ProcCreateSpatialContextCompleteEXT
 CreateSpatialPersistenceContextAsyncEXT:           ProcCreateSpatialPersistenceContextAsyncEXT
 CreateSpatialPersistenceContextCompleteEXT:        ProcCreateSpatialPersistenceContextCompleteEXT
+SetAndroidApplicationThreadKHR:                    ProcSetAndroidApplicationThreadKHR
+CreateSwapchainAndroidSurfaceKHR:                  ProcCreateSwapchainAndroidSurfaceKHR
 
 // Other procedures
 
@@ -1015,6 +1019,8 @@ load_proc_addresses_instance :: proc(instance: Instance) {
     _ = GetInstanceProcAddr(instance, "xrCreateSpatialContextCompleteEXT", auto_cast &CreateSpatialContextCompleteEXT)
     _ = GetInstanceProcAddr(instance, "xrCreateSpatialPersistenceContextAsyncEXT", auto_cast &CreateSpatialPersistenceContextAsyncEXT)
     _ = GetInstanceProcAddr(instance, "xrCreateSpatialPersistenceContextCompleteEXT", auto_cast &CreateSpatialPersistenceContextCompleteEXT)
+    _ = GetInstanceProcAddr(instance, "xrSetAndroidApplicationThreadKHR", auto_cast &SetAndroidApplicationThreadKHR)
+    _ = GetInstanceProcAddr(instance, "xrCreateSwapchainAndroidSurfaceKHR", auto_cast &CreateSwapchainAndroidSurfaceKHR)
     _ = GetInstanceProcAddr(instance, "xrLocateSpace", auto_cast &LocateSpace)
     _ = GetInstanceProcAddr(instance, "xrDestroySpace", auto_cast &DestroySpace)
     _ = GetInstanceProcAddr(instance, "xrDestroySwapchain", auto_cast &DestroySwapchain)
@@ -1419,6 +1425,8 @@ load_proc_addresses_custom :: proc(set_proc_address: SetProcAddressType) {
     set_proc_address(&CreateSpatialContextCompleteEXT, "xrCreateSpatialContextCompleteEXT")
     set_proc_address(&CreateSpatialPersistenceContextAsyncEXT, "xrCreateSpatialPersistenceContextAsyncEXT")
     set_proc_address(&CreateSpatialPersistenceContextCompleteEXT, "xrCreateSpatialPersistenceContextCompleteEXT")
+    set_proc_address(&SetAndroidApplicationThreadKHR, "xrSetAndroidApplicationThreadKHR")
+    set_proc_address(&CreateSwapchainAndroidSurfaceKHR, "xrCreateSwapchainAndroidSurfaceKHR")
 
     // Other procedures
     set_proc_address(&LocateSpace, "xrLocateSpace")
@@ -1631,7 +1639,7 @@ load_proc_addresses_custom :: proc(set_proc_address: SetProcAddressType) {
     set_proc_address(&UnpersistSpatialEntityCompleteEXT, "xrUnpersistSpatialEntityCompleteEXT")
 }
 
-load_proc_addresses :: proc{
+load_proc_addresses :: proc {
     load_proc_addresses_global,
     load_proc_addresses_instance,
     load_proc_addresses_custom,

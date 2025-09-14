@@ -2149,19 +2149,26 @@ SpatialPersistenceStateEXT :: enum i32 {
     NOT_FOUND                                  = 2,
 }
 
-InstanceCreateFlags :: distinct bit_set[InstanceCreateFlag; i64]
+AndroidThreadTypeKHR :: enum i32 {
+    APPLICATION_MAIN                              = 1,
+    APPLICATION_WORKER                            = 2,
+    RENDERER_MAIN                                 = 3,
+    RENDERER_WORKER                               = 4,
+}
+
+InstanceCreateFlags :: distinct bit_set[InstanceCreateFlag; u64]
 InstanceCreateFlag :: enum u64 {}
 
-SessionCreateFlags :: distinct bit_set[SessionCreateFlag; i64]
+SessionCreateFlags :: distinct bit_set[SessionCreateFlag; u64]
 SessionCreateFlag :: enum u64 {}
 
-SpaceVelocityFlags :: distinct bit_set[SpaceVelocityFlag; i64]
+SpaceVelocityFlags :: distinct bit_set[SpaceVelocityFlag; u64]
 SpaceVelocityFlag :: enum u64 {
     LINEAR_VALID                    = 0,
     ANGULAR_VALID                   = 1,
 }
 
-SpaceLocationFlags :: distinct bit_set[SpaceLocationFlag; i64]
+SpaceLocationFlags :: distinct bit_set[SpaceLocationFlag; u64]
 SpaceLocationFlag :: enum u64 {
     ORIENTATION_VALID                     = 0,
     POSITION_VALID                        = 1,
@@ -2169,13 +2176,13 @@ SpaceLocationFlag :: enum u64 {
     POSITION_TRACKED                      = 3,
 }
 
-SwapchainCreateFlags :: distinct bit_set[SwapchainCreateFlag; i64]
+SwapchainCreateFlags :: distinct bit_set[SwapchainCreateFlag; u64]
 SwapchainCreateFlag :: enum u64 {
     PROTECTED_CONTENT                     = 0,
     STATIC_IMAGE                          = 1,
 }
 
-SwapchainUsageFlags :: distinct bit_set[SwapchainUsageFlag; i64]
+SwapchainUsageFlags :: distinct bit_set[SwapchainUsageFlag; u64]
 SwapchainUsageFlag :: enum u64 {
     COLOR_ATTACHMENT                            = 0,
     DEPTH_STENCIL_ATTACHMENT                    = 1,
@@ -2188,7 +2195,7 @@ SwapchainUsageFlag :: enum u64 {
     INPUT_ATTACHMENT_KHR                        = 7,
 }
 
-CompositionLayerFlags :: distinct bit_set[CompositionLayerFlag; i64]
+CompositionLayerFlags :: distinct bit_set[CompositionLayerFlag; u64]
 CompositionLayerFlag :: enum u64 {
     CORRECT_CHROMATIC_ABERRATION                      = 0,
     BLEND_TEXTURE_SOURCE_ALPHA                        = 1,
@@ -2196,7 +2203,7 @@ CompositionLayerFlag :: enum u64 {
     INVERTED_ALPHA_EXT                                = 3,
 }
 
-ViewStateFlags :: distinct bit_set[ViewStateFlag; i64]
+ViewStateFlags :: distinct bit_set[ViewStateFlag; u64]
 ViewStateFlag :: enum u64 {
     ORIENTATION_VALID                 = 0,
     POSITION_VALID                    = 1,
@@ -2204,14 +2211,14 @@ ViewStateFlag :: enum u64 {
     POSITION_TRACKED                  = 3,
 }
 
-InputSourceLocalizedNameFlags :: distinct bit_set[InputSourceLocalizedNameFlag; i64]
+InputSourceLocalizedNameFlags :: distinct bit_set[InputSourceLocalizedNameFlag; u64]
 InputSourceLocalizedNameFlag :: enum u64 {
     USER_PATH                                          = 0,
     INTERACTION_PROFILE                                = 1,
     COMPONENT                                          = 2,
 }
 
-DebugUtilsMessageSeverityFlagsEXT :: distinct bit_set[DebugUtilsMessageSeverityFlagEXT; i64]
+DebugUtilsMessageSeverityFlagsEXT :: distinct bit_set[DebugUtilsMessageSeverityFlagEXT; u64]
 DebugUtilsMessageSeverityFlagEXT :: enum u64 {
     VERBOSE                                     = 0,
     INFO                                        = 4,
@@ -2219,7 +2226,7 @@ DebugUtilsMessageSeverityFlagEXT :: enum u64 {
     ERROR                                       = 12,
 }
 
-DebugUtilsMessageTypeFlagsEXT :: distinct bit_set[DebugUtilsMessageTypeFlagEXT; i64]
+DebugUtilsMessageTypeFlagsEXT :: distinct bit_set[DebugUtilsMessageTypeFlagEXT; u64]
 DebugUtilsMessageTypeFlagEXT :: enum u64 {
     GENERAL                                     = 0,
     VALIDATION                                  = 1,
@@ -2227,26 +2234,26 @@ DebugUtilsMessageTypeFlagEXT :: enum u64 {
     CONFORMANCE                                 = 3,
 }
 
-OverlaySessionCreateFlagsEXTX :: distinct bit_set[OverlaySessionCreateFlagEXTX; i64]
+OverlaySessionCreateFlagsEXTX :: distinct bit_set[OverlaySessionCreateFlagEXTX; u64]
 OverlaySessionCreateFlagEXTX :: enum u64 {}
 
-OverlayMainSessionFlagsEXTX :: distinct bit_set[OverlayMainSessionFlagEXTX; i64]
+OverlayMainSessionFlagsEXTX :: distinct bit_set[OverlayMainSessionFlagEXTX; u64]
 OverlayMainSessionFlagEXTX :: enum u64 {
     ENABLED_COMPOSITION_LAYER_INFO_DEPTH                              = 0,
 }
 
-CompositionLayerImageLayoutFlagsFB :: distinct bit_set[CompositionLayerImageLayoutFlagFB; i64]
+CompositionLayerImageLayoutFlagsFB :: distinct bit_set[CompositionLayerImageLayoutFlagFB; u64]
 CompositionLayerImageLayoutFlagFB :: enum u64 {
     VERTICAL_FLIP                                      = 0,
 }
 
-CompositionLayerSecureContentFlagsFB :: distinct bit_set[CompositionLayerSecureContentFlagFB; i64]
+CompositionLayerSecureContentFlagsFB :: distinct bit_set[CompositionLayerSecureContentFlagFB; u64]
 CompositionLayerSecureContentFlagFB :: enum u64 {
     EXCLUDE_LAYER                                        = 0,
     REPLACE_LAYER                                        = 1,
 }
 
-HandTrackingAimFlagsFB :: distinct bit_set[HandTrackingAimFlagFB; i64]
+HandTrackingAimFlagsFB :: distinct bit_set[HandTrackingAimFlagFB; u64]
 HandTrackingAimFlagFB :: enum u64 {
     COMPUTED                                = 0,
     VALID                                   = 1,
@@ -2259,16 +2266,16 @@ HandTrackingAimFlagFB :: enum u64 {
     MENU_PRESSED                            = 8,
 }
 
-SwapchainCreateFoveationFlagsFB :: distinct bit_set[SwapchainCreateFoveationFlagFB; i64]
+SwapchainCreateFoveationFlagsFB :: distinct bit_set[SwapchainCreateFoveationFlagFB; u64]
 SwapchainCreateFoveationFlagFB :: enum u64 {
     SCALED_BIN                                            = 0,
     FRAGMENT_DENSITY_MAP                                  = 1,
 }
 
-SwapchainStateFoveationFlagsFB :: distinct bit_set[SwapchainStateFoveationFlagFB; i64]
+SwapchainStateFoveationFlagsFB :: distinct bit_set[SwapchainStateFoveationFlagFB; u64]
 SwapchainStateFoveationFlagFB :: enum u64 {}
 
-KeyboardTrackingFlagsFB :: distinct bit_set[KeyboardTrackingFlagFB; i64]
+KeyboardTrackingFlagsFB :: distinct bit_set[KeyboardTrackingFlagFB; u64]
 KeyboardTrackingFlagFB :: enum u64 {
     EXISTS                            = 0,
     LOCAL                             = 1,
@@ -2276,31 +2283,31 @@ KeyboardTrackingFlagFB :: enum u64 {
     CONNECTED                         = 3,
 }
 
-KeyboardTrackingQueryFlagsFB :: distinct bit_set[KeyboardTrackingQueryFlagFB; i64]
+KeyboardTrackingQueryFlagsFB :: distinct bit_set[KeyboardTrackingQueryFlagFB; u64]
 KeyboardTrackingQueryFlagFB :: enum u64 {
     LOCAL                                = 1,
     REMOTE                               = 2,
 }
 
-TriangleMeshFlagsFB :: distinct bit_set[TriangleMeshFlagFB; i64]
+TriangleMeshFlagsFB :: distinct bit_set[TriangleMeshFlagFB; u64]
 TriangleMeshFlagFB :: enum u64 {
     MUTABLE                     = 0,
 }
 
-PassthroughCapabilityFlagsFB :: distinct bit_set[PassthroughCapabilityFlagFB; i64]
+PassthroughCapabilityFlagsFB :: distinct bit_set[PassthroughCapabilityFlagFB; u64]
 PassthroughCapabilityFlagFB :: enum u64 {
     SUPPORTED                                = 0,
     COLOR                                    = 1,
     LAYER_DEPTH                              = 2,
 }
 
-PassthroughFlagsFB :: distinct bit_set[PassthroughFlagFB; i64]
+PassthroughFlagsFB :: distinct bit_set[PassthroughFlagFB; u64]
 PassthroughFlagFB :: enum u64 {
     IS_RUNNING_AT_CREATION                   = 0,
     LAYER_DEPTH                              = 1,
 }
 
-PassthroughStateChangedFlagsFB :: distinct bit_set[PassthroughStateChangedFlagFB; i64]
+PassthroughStateChangedFlagsFB :: distinct bit_set[PassthroughStateChangedFlagFB; u64]
 PassthroughStateChangedFlagFB :: enum u64 {
     REINIT_REQUIRED                                       = 0,
     NON_RECOVERABLE_ERROR                                 = 1,
@@ -2308,24 +2315,24 @@ PassthroughStateChangedFlagFB :: enum u64 {
     RESTORED_ERROR                                        = 3,
 }
 
-RenderModelFlagsFB :: distinct bit_set[RenderModelFlagFB; i64]
+RenderModelFlagsFB :: distinct bit_set[RenderModelFlagFB; u64]
 RenderModelFlagFB :: enum u64 {
     SUPPORTS_GLTF_2_0_SUBSET_1                    = 0,
     SUPPORTS_GLTF_2_0_SUBSET_2                    = 1,
 }
 
-FrameEndInfoFlagsML :: distinct bit_set[FrameEndInfoFlagML; i64]
+FrameEndInfoFlagsML :: distinct bit_set[FrameEndInfoFlagML; u64]
 FrameEndInfoFlagML :: enum u64 {
     PROTECTED                      = 0,
     VIGNETTE                       = 1,
 }
 
-GlobalDimmerFrameEndInfoFlagsML :: distinct bit_set[GlobalDimmerFrameEndInfoFlagML; i64]
+GlobalDimmerFrameEndInfoFlagsML :: distinct bit_set[GlobalDimmerFrameEndInfoFlagML; u64]
 GlobalDimmerFrameEndInfoFlagML :: enum u64 {
     ENABLED                                    = 0,
 }
 
-LocalizationMapErrorFlagsML :: distinct bit_set[LocalizationMapErrorFlagML; i64]
+LocalizationMapErrorFlagsML :: distinct bit_set[LocalizationMapErrorFlagML; u64]
 LocalizationMapErrorFlagML :: enum u64 {
     UNKNOWN                                         = 0,
     OUT_OF_MAPPED_AREA                              = 1,
@@ -2335,32 +2342,32 @@ LocalizationMapErrorFlagML :: enum u64 {
     HEADPOSE                                        = 5,
 }
 
-CompositionLayerSpaceWarpInfoFlagsFB :: distinct bit_set[CompositionLayerSpaceWarpInfoFlagFB; i64]
+CompositionLayerSpaceWarpInfoFlagsFB :: distinct bit_set[CompositionLayerSpaceWarpInfoFlagFB; u64]
 CompositionLayerSpaceWarpInfoFlagFB :: enum u64 {
     FRAME_SKIP                                         = 0,
 }
 
-SemanticLabelsSupportFlagsFB :: distinct bit_set[SemanticLabelsSupportFlagFB; i64]
+SemanticLabelsSupportFlagsFB :: distinct bit_set[SemanticLabelsSupportFlagFB; u64]
 SemanticLabelsSupportFlagFB :: enum u64 {
     MULTIPLE_SEMANTIC_LABELS                                     = 0,
     ACCEPT_DESK_TO_TABLE_MIGRATION                               = 1,
     ACCEPT_INVISIBLE_WALL_FACE                                   = 2,
 }
 
-DigitalLensControlFlagsALMALENCE :: distinct bit_set[DigitalLensControlFlagALMALENCE; i64]
+DigitalLensControlFlagsALMALENCE :: distinct bit_set[DigitalLensControlFlagALMALENCE; u64]
 DigitalLensControlFlagALMALENCE :: enum u64 {
     PROCESSING_DISABLE                                   = 0,
 }
 
-FoveationEyeTrackedProfileCreateFlagsMETA :: distinct bit_set[FoveationEyeTrackedProfileCreateFlagMETA; i64]
+FoveationEyeTrackedProfileCreateFlagsMETA :: distinct bit_set[FoveationEyeTrackedProfileCreateFlagMETA; u64]
 FoveationEyeTrackedProfileCreateFlagMETA :: enum u64 {}
 
-FoveationEyeTrackedStateFlagsMETA :: distinct bit_set[FoveationEyeTrackedStateFlagMETA; i64]
+FoveationEyeTrackedStateFlagsMETA :: distinct bit_set[FoveationEyeTrackedStateFlagMETA; u64]
 FoveationEyeTrackedStateFlagMETA :: enum u64 {
     VALID                                     = 0,
 }
 
-CompositionLayerSettingsFlagsFB :: distinct bit_set[CompositionLayerSettingsFlagFB; i64]
+CompositionLayerSettingsFlagsFB :: distinct bit_set[CompositionLayerSettingsFlagFB; u64]
 CompositionLayerSettingsFlagFB :: enum u64 {
     NORMAL_SUPER_SAMPLING                                   = 0,
     QUALITY_SUPER_SAMPLING                                  = 1,
@@ -2369,23 +2376,23 @@ CompositionLayerSettingsFlagFB :: enum u64 {
     AUTO_LAYER_FILTER_META                                  = 5,
 }
 
-FrameSynthesisInfoFlagsEXT :: distinct bit_set[FrameSynthesisInfoFlagEXT; i64]
+FrameSynthesisInfoFlagsEXT :: distinct bit_set[FrameSynthesisInfoFlagEXT; u64]
 FrameSynthesisInfoFlagEXT :: enum u64 {
     USE_2D_MOTION_VECTOR                                       = 0,
     REQUEST_RELAXED_FRAME_INTERVAL                             = 1,
 }
 
-PassthroughPreferenceFlagsMETA :: distinct bit_set[PassthroughPreferenceFlagMETA; i64]
+PassthroughPreferenceFlagsMETA :: distinct bit_set[PassthroughPreferenceFlagMETA; u64]
 PassthroughPreferenceFlagMETA :: enum u64 {
     DEFAULT_TO_ACTIVE                                = 0,
 }
 
-VirtualKeyboardInputStateFlagsMETA :: distinct bit_set[VirtualKeyboardInputStateFlagMETA; i64]
+VirtualKeyboardInputStateFlagsMETA :: distinct bit_set[VirtualKeyboardInputStateFlagMETA; u64]
 VirtualKeyboardInputStateFlagMETA :: enum u64 {
     PRESSED                                      = 0,
 }
 
-ExternalCameraStatusFlagsOCULUS :: distinct bit_set[ExternalCameraStatusFlagOCULUS; i64]
+ExternalCameraStatusFlagsOCULUS :: distinct bit_set[ExternalCameraStatusFlagOCULUS; u64]
 ExternalCameraStatusFlagOCULUS :: enum u64 {
     CONNECTED                                           = 0,
     CALIBRATING                                         = 1,
@@ -2394,33 +2401,33 @@ ExternalCameraStatusFlagOCULUS :: enum u64 {
     CAPTURING                                           = 4,
 }
 
-PerformanceMetricsCounterFlagsMETA :: distinct bit_set[PerformanceMetricsCounterFlagMETA; i64]
+PerformanceMetricsCounterFlagsMETA :: distinct bit_set[PerformanceMetricsCounterFlagMETA; u64]
 PerformanceMetricsCounterFlagMETA :: enum u64 {
     ANY_VALUE_VALID                                       = 0,
     UINT_VALUE_VALID                                      = 1,
     FLOAT_VALUE_VALID                                     = 2,
 }
 
-EnvironmentDepthProviderCreateFlagsMETA :: distinct bit_set[EnvironmentDepthProviderCreateFlagMETA; i64]
+EnvironmentDepthProviderCreateFlagsMETA :: distinct bit_set[EnvironmentDepthProviderCreateFlagMETA; u64]
 EnvironmentDepthProviderCreateFlagMETA :: enum u64 {}
 
-EnvironmentDepthSwapchainCreateFlagsMETA :: distinct bit_set[EnvironmentDepthSwapchainCreateFlagMETA; i64]
+EnvironmentDepthSwapchainCreateFlagsMETA :: distinct bit_set[EnvironmentDepthSwapchainCreateFlagMETA; u64]
 EnvironmentDepthSwapchainCreateFlagMETA :: enum u64 {}
 
-FoveationDynamicFlagsHTC :: distinct bit_set[FoveationDynamicFlagHTC; i64]
+FoveationDynamicFlagsHTC :: distinct bit_set[FoveationDynamicFlagHTC; u64]
 FoveationDynamicFlagHTC :: enum u64 {
     LEVEL_ENABLED                                        = 0,
     CLEAR_FOV_ENABLED                                    = 1,
     FOCAL_CENTER_OFFSET_ENABLED                          = 2,
 }
 
-SpatialMeshConfigFlagsBD :: distinct bit_set[SpatialMeshConfigFlagBD; i64]
+SpatialMeshConfigFlagsBD :: distinct bit_set[SpatialMeshConfigFlagBD; u64]
 SpatialMeshConfigFlagBD :: enum u64 {
     SEMANTIC_BD                                          = 0,
     ALIGN_SEMANTIC_WITH_VERTEX_BD                        = 1,
 }
 
-PlaneDetectionCapabilityFlagsEXT :: distinct bit_set[PlaneDetectionCapabilityFlagEXT; i64]
+PlaneDetectionCapabilityFlagsEXT :: distinct bit_set[PlaneDetectionCapabilityFlagEXT; u64]
 PlaneDetectionCapabilityFlagEXT :: enum u64 {
     PLANE_DETECTION                                     = 0,
     PLANE_HOLES                                         = 1,
@@ -2431,12 +2438,12 @@ PlaneDetectionCapabilityFlagEXT :: enum u64 {
     ORIENTATION                                         = 6,
 }
 
-PlaneDetectorFlagsEXT :: distinct bit_set[PlaneDetectorFlagEXT; i64]
+PlaneDetectorFlagsEXT :: distinct bit_set[PlaneDetectorFlagEXT; u64]
 PlaneDetectorFlagEXT :: enum u64 {
     ENABLE_CONTOUR                       = 0,
 }
 
-WorldMeshDetectorFlagsML :: distinct bit_set[WorldMeshDetectorFlagML; i64]
+WorldMeshDetectorFlagsML :: distinct bit_set[WorldMeshDetectorFlagML; u64]
 WorldMeshDetectorFlagML :: enum u64 {
     POINT_CLOUD                                  = 0,
     COMPUTE_NORMALS                              = 1,
@@ -2446,7 +2453,7 @@ WorldMeshDetectorFlagML :: enum u64 {
     INDEX_ORDER_CW                               = 5,
 }
 
-FacialExpressionBlendShapePropertiesFlagsML :: distinct bit_set[FacialExpressionBlendShapePropertiesFlagML; i64]
+FacialExpressionBlendShapePropertiesFlagsML :: distinct bit_set[FacialExpressionBlendShapePropertiesFlagML; u64]
 FacialExpressionBlendShapePropertiesFlagML :: enum u64 {
     VALID                                                  = 0,
     TRACKED                                                = 1,

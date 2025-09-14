@@ -8,13 +8,13 @@ from typing import Optional
 file_base_url = "https://raw.githubusercontent.com/KhronosGroup/OpenXR-SDK/refs/heads/main/include/openxr/"
 
 source_files = [
-    ("openxr.h",                           False),
-    ("openxr_loader_negotiation.h",        True),
-    ("openxr_platform.h",                  True),
-    ("openxr_platform_defines.h",          True),
-    ("openxr_reflection.h",                True),
-    ("openxr_reflection_parent_structs.h", True),
-    ("openxr_reflection_structs.h",        True),
+    "openxr.h",
+    "openxr_loader_negotiation.h",
+    "openxr_platform.h",
+    "openxr_platform_defines.h",
+    "openxr_reflection.h",
+    "openxr_reflection_parent_structs.h",
+    "openxr_reflection_structs.h",
 ]
 
 all_enumerants = {}
@@ -22,7 +22,7 @@ all_enumerants = {}
 script_dir = os.path.dirname(os.path.abspath(__file__))
 bindings_dir = os.path.abspath(os.path.join(script_dir, "../"))
 
-for file, _ in source_files:
+for file in source_files:
     filepath = os.path.join(script_dir, file)
     if not os.path.isfile(filepath):
         with open(filepath, "w", encoding="utf-8") as f:
@@ -32,15 +32,6 @@ for file, _ in source_files:
 def die(msg: str) -> None:
     print("Error: " + msg)
     exit(1)
-
-
-src = ""
-for file, skip in source_files:
-    if skip:
-        continue
-    filepath = os.path.join(script_dir, file)
-    with open(filepath, "r", encoding="utf-8") as f:
-        src += f.read()
 
 defines_to_skip = [
     "XR_TRUE",
@@ -102,10 +93,27 @@ class Argument_Or_Member:
         else:
             f.write(f"{ident: <{alignment}}{self.type},\n")
 
+additional_name_filter = None
+
 def no_xr(s: str) -> str:
+    if additional_name_filter is not None:
+        s = additional_name_filter(s)
+
     s = s.replace("PFN_xr", "Proc")
-    s = re.sub("^(?:Xr|XR_)?(\\w+)", "\\1", s)
+    s = re.sub("^(?:Xr|XR_)(\\w+)", "\\1", s)
+
     return s
+
+def no_xr_type(s: str) -> str:
+    if additional_name_filter is not None:
+        s = additional_name_filter(s)
+
+    if is_processing_graphics_api:
+        s = s.replace("PFN_xr", "xr.Proc")
+        s = re.sub("^(?:Xr)(\\w+)", "xr.\\1", s)
+    else:
+        s = s.replace("PFN_xr", "Proc")
+        s = re.sub("^(?:Xr|XR_)(\\w+)", "\\1", s)
 
 def parse_current_version(src: str) -> (int, int, int):
     lines = src.splitlines()
@@ -213,7 +221,7 @@ def parse_defines(src: str) -> [Define]:
     return defines
 
 def make_identifier(s: str) -> str:
-    keywords = {"map", "dynamic"}
+    keywords = {"map", "dynamic", "context"}
     if s in keywords:
         return s + "_"
     return s
@@ -251,6 +259,12 @@ def parse_argument_or_member(arg_str: str) -> Argument_Or_Member:
             arg_str = arg_str + "cstring"
             arg_name_unmodified = "cstring"
             continue
+        if token_match_list(tokens, ["const", "wchar_t", "*"]) or \
+           token_match_list(tokens, ["wchar_t", "const", "*"]):
+            tokens = tokens[3:]
+            arg_str = arg_str + "cstring16"
+            arg_name_unmodified = "cstring16"
+            continue
 
         token = tokens.pop(0)
         if token == "const" or token == "XR_MAY_ALIAS" or token == "struct":
@@ -271,7 +285,6 @@ def parse_argument_or_member(arg_str: str) -> Argument_Or_Member:
 
     if array_size is not None:
         if array_size.startswith("XR_") and array_size in all_enumerants:
-            print("Found value that is an enumerant: " + array_size)
             enum_name = all_enumerants[array_size]
             array_size = no_xr(enum_name) + "." + strip_enumerant_name(enum_name, array_size)
         arg_str = f"[{no_xr(array_size)}]{arg_str}"
@@ -322,6 +335,7 @@ type_mappings = {
     "size_t":    "usize",
     "ptrdiff_t": "isize",
     "char":      "u8",
+    "wchar_t":   "u16", # NOTE: This is only fine because wchar_t is only used for windows
     "float":     "f32",
     "double":    "f64",
     "XrBool32":  "b32",
@@ -630,7 +644,7 @@ def strip_enumerant_name(enum_name: str, enumerant_name: str) -> str:
     return res
 
 
-def parse_enum(src: str) -> Enum:
+def parse_enums(src: str) -> Enum:
     enums = []
     lines = src.splitlines()
     i = 0
@@ -724,6 +738,96 @@ def make_alignment(array, predicate) -> int:
     res = max(len(predicate(x)) for x in array)
     return res
 
+supported_platform_ifdefs = [
+    "ANDROID",
+    "XLIB",
+    "WIN32",
+    "XCB",
+    "WAYLAND",
+    "EGL",
+]
+
+def process_platform_file(platform_src: str, graphics_api :str= None) -> str:
+    src = ""
+    lines = platform_src.splitlines()
+
+    is_supported_platform = True
+    is_graphics_api = graphics_api is None
+    guard_stack = []
+
+    for line in lines:
+        ifdef_match = re.match(r"#(if(?:n)?def)\s+(\w+)$", line.strip())
+        if ifdef_match is not None:
+            kind = ifdef_match.group(1)
+            macro = ifdef_match.group(2)
+            guard_stack.append(macro)
+            # print("Open: " + macro + " - Count: " + str(len(guard_stack)))
+            if kind == "ifndef":
+                continue
+            if macro.startswith("XR_USE_PLATFORM_"):
+                is_supported_platform = (macro.replace("XR_USE_PLATFORM_", "") in supported_platform_ifdefs)
+                continue
+
+            if macro.startswith("XR_USE_GRAPHICS_API_"):
+                if graphics_api is None:
+                    is_graphics_api = False
+                    continue
+                is_graphics_api = (macro.replace("XR_USE_GRAPHICS_API_", "") == graphics_api)
+                continue
+
+        endif_match = re.match(r"#endif.*$", line.strip())
+        if endif_match is not None:
+            assert(len(guard_stack) > 0)
+            macro = guard_stack.pop()
+            if macro.startswith("XR_USE_GRAPHICS_API_") and \
+                graphics_api is not None and \
+                macro.replace("XR_USE_GRAPHICS_API_", "") == graphics_api:
+                is_graphics_api = False
+
+            # print("Close - Count: " + str(len(guard_stack)))
+            if len(guard_stack) == 0:
+                is_supported_platform = True
+                is_graphics_api = graphics_api is None
+            continue
+
+        if is_supported_platform and is_graphics_api:
+            src += line + "\n"
+
+    if len(guard_stack) != 0:
+        die("Mismatched #ifdef/#endif in platform file")
+
+    return src
+
+def do_defines(f: file, src: str) -> None:
+    defines = parse_defines(src)
+    alignment = make_alignment(defines, lambda d: no_xr(d.name) + " ")
+    for d in defines:
+        f.write(f"{no_xr(d.name): <{alignment}}:: {no_xr(d.value)}\n")
+
+def do_enums_and_flags(f: file, src: str) -> None:
+    enums = parse_enums(src)
+    for e in enums:
+        for entry in e.entries:
+            all_enumerants[entry.name] = e.name
+
+    flags = parse_flags(src)
+    for e in enums:
+        e.write(f)
+        f.write("\n")
+
+    for flag in flags:
+        name = no_xr(flag.name)
+        f.write(name.replace("Flag", "Flags") + " :: distinct bit_set[" + name + "; u64]\n")
+        flag.write(f)
+        f.write("\n")
+
+def do_structs(f: file, src: str) -> None:
+    structs = parse_structs(src)
+    for s in structs:
+        s.write(f)
+        f.write("\n")
+
+
 BASE = """
 //
 // OpenXR wrapper generated from: https://raw.githubusercontent.com/KhronosGroup/OpenXR-SDK/refs/heads/main/include/openxr/openxr.h
@@ -732,11 +836,24 @@ package vendor_openxr
 
 """[1::]
 
+src = ""
+
+xr_filepath = os.path.join(script_dir, "openxr.h")
+with open(xr_filepath, "r", encoding="utf-8") as f:
+    src += f.read()
+
+xr_platform_filepath = os.path.join(script_dir, "openxr_platform.h")
+platform_src = ""
+with open(xr_platform_filepath, "r", encoding="utf-8") as f:
+    platform_src = f.read()
+
+additional_platform_src = process_platform_file(platform_src)
+src += additional_platform_src
+
 core_file =   os.path.join(bindings_dir, "core.odin")
 proc_file =   os.path.join(bindings_dir, "procedures.odin")
 enum_file =   os.path.join(bindings_dir, "enums.odin")
 struct_file = os.path.join(bindings_dir, "structs.odin")
-
 
 #
 # Core file contains version defines and hard-coded functions
@@ -757,11 +874,7 @@ VERSION_PATCH :: proc(version: u64) -> u32 { return cast(u32)(version & 0xFFFF_F
     f.write(f"\nAPI_VERSION_1_0 :: (u64(1 << 48) | u64(0 << 32) | u64({patch}))\n")
     f.write("""
 """)
-    defines = parse_defines(src)
-    alignment = make_alignment(defines, lambda d: no_xr(d.name) + " ")
-    for d in defines:
-        f.write(f"{no_xr(d.name): <{alignment}}:: {no_xr(d.value)}\n")
-
+    do_defines(f, src)
     f.write("SetProcAddressType :: #type proc(p: rawptr, name: cstring)\n")
 
 #
@@ -769,23 +882,10 @@ VERSION_PATCH :: proc(version: u64) -> u32 { return cast(u32)(version & 0xFFFF_F
 # NOTE: This needs to be before struct and proc files, as there might be enumerants
 #       used as array sizes in procedure arguments or struct members.
 #
+
 with open(enum_file, "w", encoding="utf-8") as f:
     f.write(BASE)
-    enums = parse_enum(src)
-    for e in enums:
-        for entry in e.entries:
-            all_enumerants[entry.name] = e.name
-
-    flags = parse_flags(src)
-    for e in enums:
-        e.write(f)
-        f.write("\n")
-
-    for flag in flags:
-        name = no_xr(flag.name)
-        f.write(name.replace("Flag", "Flags") + " :: distinct bit_set[" + name + "; i64]\n")
-        flag.write(f)
-        f.write("\n")
+    do_enums_and_flags(f, src)
 
 #
 # Procedure files. Contains proc typedefs, pointers and laoders
@@ -839,7 +939,7 @@ with open(proc_file, "w", encoding="utf-8") as f:
         f.write(f"    set_proc_address(&{proc.name}, \"xr{proc.name}\")\n")
     f.write("}\n")
     f.write("""
-load_proc_addresses :: proc{
+load_proc_addresses :: proc {
     load_proc_addresses_global,
     load_proc_addresses_instance,
     load_proc_addresses_custom,
@@ -852,8 +952,123 @@ load_proc_addresses :: proc{
 with open(struct_file, "w", encoding="utf-8") as f:
     f.write(BASE)
 
-    structs = parse_structs(src)
-    for s in structs:
-        s.write(f)
+    f.write("""
+import "vendor:egl"
+_ :: egl
+
+when ODIN_OS == .Linux {
+    EGLDisplay :: egl.Display
+    EGLConfig  :: egl.Config
+    EGLContext :: egl.Context
+} else {
+    EGLDisplay :: rawptr
+    EGLConfig  :: rawptr
+    EGLContext :: rawptr
+}
+
+when ODIN_PLATFORM_SUBTARGET == .Android {
+    // @TODO: If an android library is added to the vendor or core packages,
+    // this should be imported from there instead.
+    AIBinder :: struct {}
+} else {
+    AIBinder :: struct {}
+}
+
+jobject :: rawptr // Android JNI object handle
+""")
+
+    do_structs(f, src)
+
+
+@dataclass
+class Graphics_API:
+    name: str
+    api_macro: str
+    platforms_strings: [str]
+    imports: [(str, str)]
+    filter_callable: callable = None
+
+
+def vulkan_filter(s: str) -> str:
+    s = re.sub("^(?:Vk)(\\w+)", "vk.\\1", s)
+    s = re.sub("^(?:PFN_vk)(\\w+)", "vk.Proc\\1", s)
+    return s
+
+def opengl_filter(s: str) -> str:
+    s = re.sub("^(?:GL)(\\w+)", "gl.\\1", s)
+    s = re.sub("^(?:PFN_gl)(\\w+)", "gl.Proc\\1", s)
+    s = s.replace("EGLenum", "u32")
+    s = re.sub("^(?:EGL)(\\w+)", "egl.\\1", s)
+    return s
+
+def make_directx_filter(prefix: str) -> callable:
+    def directx_filter(s: str) -> str:
+        s = s.replace("LUID", "dxgi.LUID")
+        s = re.sub("^(?:ID3D11)(\\w+)", "d3d11.I\\1", s)
+        s = re.sub("^(?:ID3D12)(\\w+)", "d3d12.I\\1", s)
+        s = re.sub("^(?:D3D_)(\\w+)", prefix + ".\\1", s)
+        return s
+    return directx_filter
+
+# Capitalisation tries to match the vendor and core modules in Odin
+graphics_api = [
+    Graphics_API("vulkan",   "VULKAN",    [],          [("vendor:vulkan", "vk")],                                       vulkan_filter),
+    Graphics_API("OpenGL",   "OPENGL",    [],          [("vendor:OpenGL", "gl")],                                       opengl_filter),
+    Graphics_API("OpenGLES", "OPENGL_ES", ["linux"],   [("vendor:OpenGL", "gl"), ("vendor:egl", None)],                 opengl_filter),
+    Graphics_API("d3d11",    "D3D11",     ["windows"], [("vendor:directx/d3d11", None), ("vendor:directx/dxgi", None)], make_directx_filter("d3d11")),
+    Graphics_API("d3d12",    "D3D12",     ["windows"], [("vendor:directx/d3d12", None), ("vendor:directx/dxgi", None)], make_directx_filter("d3d12")),
+    Graphics_API("Metal",    "METAL",     ["darwin"],  []),
+]
+
+for api in graphics_api:
+    directory_name = os.path.join(bindings_dir, api.name)
+    os.makedirs(directory_name, exist_ok=True)
+
+    additional_name_filter = api.filter_callable
+
+    api_file = os.path.join(directory_name, f"openxr_{api.name.lower()}.odin")
+    with open(api_file, "w", encoding="utf-8") as f:
+        if len(api.platforms_strings) > 0:
+            f.write("#+build " + ", ".join(api.platforms_strings) + "\n\n")
+        f.write(f"package openxr_{api.name.lower()}\n\n")
+        f.write("import xr \"vendor:openxr\"\n")
+        for import_pair in api.imports:
+            if import_pair[1] is None:
+                f.write(f"import \"{import_pair[0]}\"\n")
+            else:
+                f.write(f"import {import_pair[1]} \"{import_pair[0]}\"\n")
         f.write("\n")
+
+        src = process_platform_file(platform_src, api.api_macro)
+
+        do_defines(f, src)
+        do_enums_and_flags(f, src)
+        do_structs(f, src)
+
+        procs = parse_procedures_type(src)
+        if len(procs) == 0:
+            continue
+
+        alignment = make_alignment(procs, lambda p: "Proc" + p.name + " :: ")
+        for proc in procs:
+            proc.write_as_type(f, alignment)
+        f.write("\n")
+        alignment = make_alignment(procs, lambda p: "Proc" + p.name + ": ")
+        for proc in procs:
+            proc.write_as_pointer(f, alignment)
+        f.write("\n")
+        f.write("load_proc_addresses_custom :: proc(set_proc_address: SetProcAddressType) {\n")
+        for proc in procs:
+            f.write(f"    set_proc_address(&{proc.name}, \"xr{proc.name}\")\n")
+        f.write("}\n\n")
+        f.write(f"load_proc_addresses :: proc(instance: Instance) {{\n")
+        for proc in procs:
+            f.write(f"    _ = GetInstanceProcAddr(instance, \"xr{proc.name}\", auto_cast &{proc.name})\n")
+        f.write("}\n\n")
+        f.write("""
+load_proc_addresses :: proc {
+    load_proc_addresses,
+    load_proc_addresses_custom,
+}
+"""[1::])
 
